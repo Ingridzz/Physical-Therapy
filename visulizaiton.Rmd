@@ -1,0 +1,79 @@
+---
+title: "visualization"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(magrittr)
+library(dplyr)
+library(gridExtra)
+```
+
+
+```{r}
+test_data = read.csv("Results/test_data.csv", header = FALSE)
+result_1dcnn = read.csv("Results/result_1dcnn.csv", header = FALSE)
+result_2dcnn = read.csv("Results/result_2dcnn.csv", header = FALSE)
+result_dnn = read.csv("Results/result_dnn.csv", header = FALSE)
+```
+
+```{r}
+i = 2649
+plot_data = rbind(
+  data.frame(type = factor(rep("raw data", 1300)), 
+             value = as.numeric(test_data[i, ]), 
+             index = c(1:1300)), 
+  data.frame(type = factor(rep("dnn autoencoder", 1300)), 
+             value = as.numeric(result_dnn[i, ]), 
+             index = c(1:1300)), 
+  data.frame(type = factor(rep("1d cnn autoencoder", 1300)), 
+             value = as.numeric(result_1dcnn[i, ]), 
+             index = c(1:1300)), 
+  data.frame(type = factor(rep("2d cnn autoencoder", 1300)), 
+             value = as.numeric(result_2dcnn[i, ]), 
+             index = c(1:1300))
+)
+cbp2 <- c("#000000", "#E69F00", "#56B4E9", "#009E73")
+pic = ggplot(data = plot_data, mapping = aes(x = index, y = value, group = type, color = type)) +
+  geom_line() + theme_bw() + scale_color_manual(values = cbp2)
+ggsave(pic, filename = "Results/visu.png", height = 6, width = 10, dpi = 1200)
+```
+
+```{r}
+pic
+```
+
+```{r}
+latent_dnn = read.csv("Results/latent_dnn.csv", header = FALSE)
+latent_1dcnn = read.csv("Results/latent_1dcnn.csv", header = FALSE)
+latent_2dcnn = read.csv("Results/latent_2dcnn.csv", header = FALSE)
+```
+
+```{r}
+pic1 = ggplot() + 
+  geom_point(mapping = aes(x = c(1:72), y = as.numeric(latent_dnn[2649, ])), 
+             color = "#E69F00", size = 2) + 
+  theme_bw() + xlab("index") + ylab("value") + ggtitle("DNN autoencoder")
+
+pic2 = ggplot() + 
+  geom_point(mapping = aes(x = c(1:72), y = as.numeric(latent_1dcnn[2649, ])), 
+             color = "#56B4E9", size = 2) + 
+  theme_bw() + xlab("index") + ylab("value") + ggtitle("1D CNN autoencoder")
+
+pic3 = ggplot() + 
+  geom_point(mapping = aes(x = c(1:72), y = as.numeric(latent_2dcnn[2649, ])), 
+             color = "#009E73", size = 2) + 
+  theme_bw() + xlab("index") + ylab("value") + ggtitle("2D CNN autoencoder")
+latent = grid.arrange(pic1, pic2, pic3, nrow = 3)
+ggsave(latent, filename = "Results/latent.png", height = 10, width = 4.5, dpi = 900)
+```
+
+
+
+
+
+
+
+
